@@ -16,3 +16,5 @@
 upload-tifo.sh
 cmd/get-tifo
 cmd/code.zip
+code.zip
+cmd/main
