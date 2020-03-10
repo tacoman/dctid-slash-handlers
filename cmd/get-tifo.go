@@ -35,7 +35,28 @@ func show(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
                     Type:   "section",
                     Text:  text {
                         Type: "mrkdwn",
-                        Text: "test date is *2020-03-10*",
+                        Text: "*Scheduled tifo dates include*",
+                    },
+                },
+                block {
+                    Type:   "section",
+                    Text:  text {
+                        Type: "mrkdwn",
+                        Text: "03/13, 5:30PM: Painting",
+                    },
+                },
+                block {
+                    Type:   "section",
+                    Text:  text {
+                        Type: "mrkdwn",
+                        Text: "03/14, 12:00PM: Painting",
+                    },
+                },
+                block {
+                    Type:   "section",
+                    Text:  text {
+                        Type: "mrkdwn",
+                        Text: "03/21, 11:00AM: Deployment for the home opener!",
                     },
                 },
     }, 
