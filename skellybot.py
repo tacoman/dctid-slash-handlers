@@ -45,12 +45,6 @@ import os
 from base64 import b64decode
 from urlparse import parse_qs
 
-
-#ENCRYPTED_EXPECTED_TOKEN = os.environ['kmsEncryptedToken']
-
-#kms = boto3.client('kms')
-#expected_token = kms.decrypt(CiphertextBlob=b64decode(ENCRYPTED_EXPECTED_TOKEN))['Plaintext']
-
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -64,13 +58,17 @@ def respond(err, res=None):
         },
     }
 
+def is_request_valid(request):
+    is_token_valid = params['token'][0] == os.environ['SLACK_VERIFICATION_TOKEN']
+    is_team_id_valid = params['team_id'][0] == os.environ['SLACK_TEAM_ID']
 
-def lambda_handler(event, context):
+    return is_token_valid and is_team_id_valid
+
+def lambda_handler(event, context):    
     params = parse_qs(event['body'])
-    #token = params['token'][0]
-    #if token != expected_token:
-    #    logger.error("Request token (%s) does not match expected", token)
-    #    return respond(Exception('Invalid request token'))
+
+    if not is_request_valid(params):
+        abort(400)
 
     user = params['user_name'][0]
     command = params['command'][0]
