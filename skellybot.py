@@ -58,7 +58,7 @@ def respond(err, res=None):
         },
     }
 
-def is_request_valid(request):
+def is_request_valid(params):
     is_token_valid = params['token'][0] == os.environ['SLACK_VERIFICATION_TOKEN']
     is_team_id_valid = params['team_id'][0] == os.environ['SLACK_TEAM_ID']
 
