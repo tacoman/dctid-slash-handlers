@@ -63,12 +63,19 @@ def is_request_valid(params):
     is_team_id_valid = params['team_id'][0] == os.environ['SLACK_TEAM_ID']
     return is_token_valid and is_team_id_valid
 
-def handleTifo():
+def createResponse():
     response = {}
     response["response_type"] = "in_channel"
     response["blocks"] = []
-    block1 = { "type": "section", "text": {"type": "mrkdwn", "text": "*Scheduled tifo dates include*"} }
-    response["blocks"].append(block1)
+    return response
+
+def addLine(response, message):
+    block = { "type": "section", "text": {"type": "mrkdwn", "text": message} }
+    response["blocks"].append(block)
+
+def handleTifo():
+    response = createResponse()
+    addLine(response, "*Scheduled tifo dates include*")
     return respond(None, response)
 
 def handlePrideraiser():
@@ -90,6 +97,6 @@ def lambda_handler(event, context):
 
     if command == "/ngstifo":
         return handleTifo()
-    else if command == "/prideraiser":
+    elif command == "/prideraiser":
         return handlePrideraiser()
     return respond(None, {})
