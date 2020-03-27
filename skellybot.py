@@ -68,7 +68,7 @@ def lambda_handler(event, context):
     params = parse_qs(event['body'])
 
     if not is_request_valid(params):
-        abort(400)
+        return respond({'message': 'Invalid token or team ID, please try again'})
 
     user = params['user_name'][0]
     command = params['command'][0]
