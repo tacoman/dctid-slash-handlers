@@ -14,40 +14,28 @@ Follow these steps to configure the slash command in Slack:
   5. After you complete this blueprint, enter the provided API endpoint URL in the URL field.
 
 
-To encrypt your secrets use the following steps:
-
-  1. Create or use an existing KMS Key - http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html
-
-  2. Click the "Enable Encryption Helpers" checkbox
-
-  3. Paste <COMMAND_TOKEN> into the kmsEncryptedToken environment variable and click encrypt
-
-
 Follow these steps to complete the configuration of your command API endpoint
 
   1. When completing the blueprint configuration select "Open" for security
      on the "Configure triggers" page.
 
   2. Enter a name for your execution role in the "Role name" field.
-     Your function's execution role needs kms:Decrypt permissions. We have
-     pre-selected the "KMS decryption permissions" policy template that will
-     automatically add these permissions.
 
   3. Update the URL for your Slack slash command with the invocation URL for the
      created API resource in the prod stage.
 '''
-
-import boto3
 import json
 import logging
 import os
+import urllib.request
+import locale
 
 from base64 import b64decode
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
+locale.setlocale( locale.LC_ALL, '' )
 
 def respond(err, res=None):
     return {
@@ -78,8 +66,25 @@ def handleTifo():
     addLine(response, "*Scheduled tifo dates include*")
     return respond(None, response)
 
-def handlePrideraiser():
-    return respond(None, {})
+def handlePrideraiser():    
+    campaignURL = "https://www.prideraiser.org/api/campaigns/{0}/".format(os.environ['PRIDERAISER_CAMPAIGN_ID'])
+    contents = urllib.request.urlopen(campaignURL).read()
+    data = json.loads(contents)
+
+    response = createResponse()
+    addLine(response, "*Live Prideraiser data for NGS:*")
+    addLine(response, "*Number of pledges:* {0}".format(data["pledge_count"]))
+    per_goal = locale.currency(data["pledged_total"], grouping=True)
+    addLine(response, "*Pledged per goal:* {0}".format(per_goal))
+    addLine(response, "*Goals scored:* {0}".format(data["goals_made"]))
+    total_amount = locale.currency(data["aggregate_pledged"], grouping=True)
+    addLine(response, "*Total amount:* {0}".format(total_amount))
+    additional_contributions = locale.currency(data["additional_contributions"], grouping=True)
+    addLine(response, "*Additional partner contributions:* {0}".format(additional_contributions))
+    aggregate_amount_raised = locale.currency(data["aggregate_amount_raised"], grouping=True)
+    addLine(response, "*Grand total:* {0}".format(aggregate_amount_raised))
+    
+    return respond(None, response)
 
 def lambda_handler(event, context):    
     params = parse_qs(event['body'])
@@ -97,6 +102,6 @@ def lambda_handler(event, context):
 
     if command == "/ngstifo":
         return handleTifo()
-    elif command == "/prideraiser":
+    elif command == "/ngsprideraiser":
         return handlePrideraiser()
     return respond(None, {})
