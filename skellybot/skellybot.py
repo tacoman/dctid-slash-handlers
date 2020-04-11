@@ -67,31 +67,10 @@ def handleTifo():
     addLine(response, "*Scheduled tifo dates include*")
     return respond(None, response)
 
-def handlePrideraiser():    
-    campaignURL = "https://www.prideraiser.org/api/campaigns/{0}/".format(os.environ['PRIDERAISER_CAMPAIGN_ID'])
-    contents = urllib.request.urlopen(campaignURL).read()
-    data = json.loads(contents)
-
-    response = createResponse()
-    addLine(response, "*Live Prideraiser data for NGS:*")
-    addLine(response, "*Number of pledges:* {0}".format(data["pledge_count"]))
-    per_goal = locale.currency(data["pledged_total"], grouping=True)
-    addLine(response, "*Pledged per goal:* {0}".format(per_goal))
-    addLine(response, "*Goals scored:* {0}".format(data["goals_made"]))
-    total_amount = locale.currency(data["aggregate_pledged"], grouping=True)
-    addLine(response, "*Total amount:* {0}".format(total_amount))
-    additional_contributions = locale.currency(data["additional_contributions"], grouping=True)
-    addLine(response, "*Additional partner contributions:* {0}".format(additional_contributions))
-    aggregate_amount_raised = locale.currency(data["aggregate_amount_raised"], grouping=True)
-    addLine(response, "*Grand total:* {0}".format(aggregate_amount_raised))
-    
-    return respond(None, response)
-
-def handlePrideraiser2(response_url):
+def handlePrideraiser(response_url):
     #send an SNS message with the response_url to trigger the second handler
     client = boto3.client('sns')
     result = client.publish(TopicArn = os.environ['PRIDERAISER_SNS_TOPIC'], Message=response_url)
-
 
     response = createResponse()
     return respond(None, response)
@@ -113,8 +92,6 @@ def lambda_handler(event, context):
     if command == "/ngstifo":
         return handleTifo()
     elif command == "/ngsprideraiser":
-        return handlePrideraiser()
-    elif command == "/ngsprideraiser2":
         response_url = params['response_url'][0]
-        return handlePrideraiser2(response_url)
+        return handlePrideraiser(response_url)
     return respond(None, {})
