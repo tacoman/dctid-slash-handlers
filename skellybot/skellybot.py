@@ -86,6 +86,11 @@ def handlePrideraiser():
     
     return respond(None, response)
 
+def handlePrideraiser2(response_url):
+    #send an SNS message with the response_url to trigger the second handler
+    response = createResponse()
+    return respond(None, response)
+
 def lambda_handler(event, context):    
     params = parse_qs(event['body'])
 
@@ -104,4 +109,7 @@ def lambda_handler(event, context):
         return handleTifo()
     elif command == "/ngsprideraiser":
         return handlePrideraiser()
+    elif command == "/ngsprideraiser2":
+        response_url = params['response_url'][0]
+        return handlePrideraiser2(response_url)
     return respond(None, {})
