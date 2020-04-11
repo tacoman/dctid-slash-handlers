@@ -29,6 +29,7 @@ import logging
 import os
 import urllib.request
 import locale
+import boto3
 
 from base64 import b64decode
 from urllib.parse import parse_qs
@@ -88,6 +89,10 @@ def handlePrideraiser():
 
 def handlePrideraiser2(response_url):
     #send an SNS message with the response_url to trigger the second handler
+    client = boto3.client('sns')
+    result = client.publish(TopicArn = os.environ['PRIDERAISER_SNS_TOPIC'], Message=response_url)
+
+
     response = createResponse()
     return respond(None, response)
 

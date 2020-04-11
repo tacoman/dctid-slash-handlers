@@ -6,7 +6,7 @@ import locale
 
 from base64 import b64decode
 from urllib.parse import parse_qs
-from urllib.request import Request, urlopen
+import requests
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,8 +23,9 @@ def addLine(response, message):
     response["blocks"].append(block)
 
 def lambda_handler(event, context):    
-    params = parse_qs(event['body'])
-    response_url = params['response_url'][0]
+    #TODO: vet if these are correct
+    message = event['Records'][0]['Sns']['Message']
+    response_url = message
 
     campaignURL = "https://www.prideraiser.org/api/campaigns/{0}/".format(os.environ['PRIDERAISER_CAMPAIGN_ID'])
     contents = urllib.request.urlopen(campaignURL).read()
@@ -43,3 +44,6 @@ def lambda_handler(event, context):
     aggregate_amount_raised = locale.currency(data["aggregate_amount_raised"], grouping=True)
     addLine(response, "*Grand total:* {0}".format(aggregate_amount_raised))
 
+    header = {"Content-type": "application/json"} 
+
+    requests.post(response_url, data=json.dumps(response), headers=header)
